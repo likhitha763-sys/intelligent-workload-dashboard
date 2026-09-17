@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Intelligent Study Planner - Academic Workload Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-calendar-range text-primary me-2"></i>Intelligent Study Planner</h3>
+        <p class="text-muted mb-0">Automated daily schedule generation prioritized by urgency, deadlines, and difficulty.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Planner Settings Card -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-primary text-white py-3 fw-bold">
+                <i class="bi bi-sliders me-2"></i>Planner Preferences
+            </div>
+            <div class="card-body p-4">
+                <form action="{{ url_for('planner.generate_plan') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="available_hours_per_day" class="form-label fw-semibold">Daily Study Capacity (Hours)</label>
+                        <input type="number" step="0.5" class="form-control" id="available_hours_per_day" name="available_hours_per_day" value="{{ pref.available_hours_per_day }}" min="1" max="14" required>
+                        <small class="text-muted">Maximum hours you can study today</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="preferred_start_time" class="form-label fw-semibold">Preferred Start Time</label>
+                        <input type="time" class="form-control" id="preferred_start_time" name="preferred_start_time" value="{{ pref.preferred_start_time }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="preferred_end_time" class="form-label fw-semibold">Preferred End Time</label>
+                        <input type="time" class="form-control" id="preferred_end_time" name="preferred_end_time" value="{{ pref.preferred_end_time }}" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="break_duration_mins" class="form-label fw-semibold">Break Interval (Minutes)</label>
+                        <input type="number" class="form-control" id="break_duration_mins" name="break_duration_mins" value="{{ pref.break_duration_mins }}" min="5" max="60" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+                        <i class="bi bi-magic me-2"></i>Generate Study Schedule
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generated Daily Schedule Table -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-clock-history text-primary me-2"></i>Recommended Today's Study Plan
+                </h5>
+                <span class="badge bg-primary fs-6 px-3 py-2">Prioritized Schedule</span>
+            </div>
+            <div class="card-body p-0">
+                {% if schedule %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Time Slot</th>
+                                <th>Task / Assignment</th>
+                                <th>Subject</th>
+                                <th>Duration</th>
+                                <th class="pe-4 text-end">Prioritization Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for slot in schedule %}
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="badge bg-primary fs-6 fw-semibold">
+                                        <i class="bi bi-clock me-1"></i>{{ slot.time_slot }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <strong class="text-dark d-block">{{ slot.title }}</strong>
+                                    <span class="badge bg-light text-muted border">{{ slot.type }}</span>
+                                </td>
+                                <td><span class="badge bg-info text-dark">{{ slot.subject }}</span></td>
+                                <td>{{ slot.hours }} hr(s)</td>
+                                <td class="pe-4 text-end">
+                                    <small class="text-danger fw-semibold"><i class="bi bi-info-circle me-1"></i>{{ slot.reason }}</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-calendar-check fs-1 d-block mb-3 text-success"></i>
+                    <h5>No items to schedule!</h5>
+                    <p class="mb-0">All pending tasks and assignments are completed or up to date.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

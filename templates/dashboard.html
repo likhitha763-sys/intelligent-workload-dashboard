@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Academic Workload Dashboard{% endblock %}
+
+{% block content %}
+<!-- Welcome & Workload Score Header Banner -->
+<div class="card border-0 shadow-sm rounded-3 bg-white mb-4 overflow-hidden">
+    <div class="card-body p-4">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <div class="d-flex align-items-center mb-2">
+                    <h2 class="fw-bold text-dark mb-0 me-3">Welcome back, {{ current_user.username }}!</h2>
+                    <span class="badge bg-{{ workload.badge_class }} fs-6 px-3 py-2">
+                        {{ workload.category }} WORKLOAD
+                    </span>
+                </div>
+                <p class="text-muted mb-3">
+                    {% if current_user.department %}{{ current_user.department }} | {% endif %}
+                    {% if current_user.college %}{{ current_user.college }}{% else %}Intelligent Academic Workload Monitoring{% endif %}
+                </p>
+
+                <!-- Workload Explanation Callout -->
+                <div class="alert alert-{{ workload.badge_class.split()[0] }} mb-0 py-2 px-3 small border-0 bg-opacity-10 text-dark">
+                    <i class="bi bi-info-circle-fill me-2 text-{{ workload.badge_class.split()[0] }}"></i>
+                    {% if workload.category == 'CRITICAL' %}
+                        Your workload is currently critical ({{ workload.score }}/100). Immediate action required for pending deadlines.
+                    {% elif workload.category == 'HIGH' %}
+                        Your workload is currently high ({{ workload.score }}/100). Focus on imminent deadlines today.
+                    {% elif workload.category == 'MODERATE' %}
+                        Your workload is moderate ({{ workload.score }}/100). Keep up steady study progress.
+                    {% else %}
+                        Your workload is low ({{ workload.score }}/100). Excellent standing! All deadlines are under control.
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Circular Workload Score Gauge Widget -->
+            <div class="col-lg-5 border-start-lg ps-lg-4 mt-4 mt-lg-0 text-center">
+                <div class="row align-items-center">
+                    <div class="col-6">
+                        <div class="workload-gauge-circle border-{{ workload.badge_class.split()[0] }} bg-light shadow-sm">
+                            <span class="display-6 fw-bold text-{{ workload.badge_class.split()[0] }}">{{ workload.score }}</span>
+                            <small class="text-muted fw-semibold">/ 100</small>
+                        </div>
+                        <small class="text-muted mt-2 d-block fw-bold">WORKLOAD INDEX</small>
+                    </div>
+                    <div class="col-6 text-start border-start">
+                        <div class="mb-2">
+                            <small class="text-muted d-block">Pending Tasks</small>
+                            <span class="fw-bold fs-5 text-primary">{{ workload.pending_tasks_count }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted d-block">Pending Assigns</small>
+                            <span class="fw-bold fs-5 text-warning">{{ workload.pending_assignments_count }}</span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Est. Study Hours</small>
+                            <span class="fw-bold fs-5 text-danger">{{ weekly_study_hours }} hrs</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Prominent Section: "What Should I Do Now?" -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-3 bg-gradient border-start border-5 border-primary">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold text-primary mb-0">
+                        <i class="bi bi-lightbulb-fill text-warning me-2"></i>What Should I Do Now?
+                    </h4>
+                    <span class="badge bg-primary text-white">Top Urgency Recommendation</span>
+                </div>
+
+                {% if top_recommendation %}
+                <div class="row align-items-center bg-light p-3 rounded-3 border">
+                    <div class="col-md-8">
+                        <span class="badge bg-info text-dark me-2">{{ top_recommendation.type }}</span>
+                        <span class="badge bg-secondary me-2">{{ top_recommendation.subject_name }}</span>
+                        <h4 class="fw-bold text-dark d-inline-block mt-2 mt-md-0 mb-1">{{ top_recommendation.title }}</h4>
+                        
+                        <p class="text-muted mb-0 small mt-1">
+                            <strong class="text-danger"><i class="bi bi-info-circle me-1"></i>Reason:</strong> {{ top_recommendation.reason }}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        {% if top_recommendation.type == 'Task' %}
+                        <form action="{{ url_for('tasks.complete_task', task_id=top_recommendation.id) }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-success btn-lg px-4 fw-bold shadow-sm">
+                                <i class="bi bi-check-circle-fill me-2"></i>START / COMPLETE TASK
+                            </button>
+                        </form>
+                        {% else %}
+                        <a href="{{ url_for('assignments.list_assignments') }}" class="btn btn-primary btn-lg px-4 fw-bold shadow-sm">
+                            <i class="bi bi-file-earmark-arrow-up me-2"></i>VIEW ASSIGNMENT
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-success mb-0 d-flex align-items-center" role="alert">
+                    <i class="bi bi-check-circle-fill fs-3 me-3"></i>
+                    <div>
+                        <h5 class="alert-heading mb-1">No Pending Work!</h5>
+                        <p class="mb-0">You have no overdue or pending tasks. Relax or get ahead on upcoming subject reading.</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section: Today's Smart Study Plan & Urgent Deadlines -->
+<div class="row g-4 mb-4">
+    <!-- Today's Study Plan -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-calendar-check me-2 text-primary"></i>Today's Smart Study Plan
+                </h5>
+                <a href="{{ url_for('planner.study_planner') }}" class="btn btn-sm btn-outline-primary">Full Planner</a>
+            </div>
+            <div class="card-body">
+                {% if daily_plan %}
+                <div class="list-group list-group-flush">
+                    {% for slot in daily_plan %}
+                    <div class="list-group-item px-0 py-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-primary me-2"><i class="bi bi-clock me-1"></i>{{ slot.time_slot }}</span>
+                                <strong class="text-dark">{{ slot.title }}</strong>
+                                <small class="text-muted d-block ms-1 mt-1"><i class="bi bi-journal me-1"></i>{{ slot.subject }}</small>
+                            </div>
+                            <span class="badge bg-light text-dark border">{{ slot.hours }} hr(s)</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-calendar-x fs-1 d-block mb-2 text-secondary"></i>
+                    <p class="mb-0">No study plan items needed for today!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Urgent Deadlines -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-exclamation-octagon me-2 text-danger"></i>Urgent Deadlines (Next 7 Days)
+                </h5>
+                <span class="badge bg-danger-subtle text-danger">High Pressure</span>
+            </div>
+            <div class="card-body">
+                {% if urgent_deadlines %}
+                <div class="table-responsive">
+                    <table class="table align-middle table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Item Title</th>
+                                <th>Subject</th>
+                                <th>Deadline</th>
+                                <th>Pressure</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in urgent_deadlines %}
+                            <tr>
+                                <td><strong class="text-dark">{{ item.title }}</strong></td>
+                                <td><small class="text-muted">{{ item.subject }}</small></td>
+                                <td>{{ item.deadline }}</td>
+                                <td>
+                                    <span class="badge {% if 'Critical' in item.pressure %}bg-danger{% elif item.pressure == 'High' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %}">
+                                        {{ item.pressure }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-shield-check fs-1 d-block mb-2 text-success"></i>
+                    <p class="mb-0">No urgent deadlines approaching in the next 7 days.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section: Attendance Overview & Categorized AI Insights -->
+<div class="row g-4 mb-4">
+    <!-- Attendance Overview -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-person-check me-2 text-success"></i>Attendance Overview (&ge; 75% Target)
+                </h5>
+                <a href="{{ url_for('attendance_module.attendance_view') }}" class="btn btn-sm btn-outline-success">Manage Attendance</a>
+            </div>
+            <div class="card-body">
+                {% if attendance_records %}
+                <div class="list-group list-group-flush">
+                    {% for att in attendance_records %}
+                    <div class="list-group-item px-0 py-2 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-dark">{{ att.subject_name }}</strong>
+                            <span class="badge bg-{{ att.badge_class }}">{{ att.percentage }}% ({{ att.status }})</span>
+                        </div>
+                        <small class="text-muted d-block">{{ att.recommendation }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-person-x fs-1 d-block mb-2 text-secondary"></i>
+                    <p class="mb-0">No attendance records yet. Add subjects to start tracking!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Categorized AI Insights Preview -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-cpu-fill me-2 text-info"></i>Categorized AI Insights
+                </h5>
+                <a href="{{ url_for('ai_insights.insights_page') }}" class="btn btn-sm btn-outline-info">All Insights</a>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    {% for insight in ai_insights %}
+                    <div class="list-group-item px-0 py-3 border-bottom d-flex align-items-start">
+                        <span class="badge bg-{{ insight.badge_class }} me-3 mt-1">{{ insight.category }}</span>
+                        <div>
+                            <p class="mb-0 text-dark small fw-medium">{{ insight.text }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

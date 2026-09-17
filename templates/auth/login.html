@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Login - Workload Dashboard{% endblock %}
+
+{% block auth_content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow border-0 rounded-3">
+            <div class="card-header bg-primary text-white text-center py-3">
+                <h4 class="mb-0 fw-bold"><i class="bi bi-mortarboard-fill me-2"></i>Student Login</h4>
+                <small>Intelligent Academic Workload Dashboard</small>
+            </div>
+            <div class="card-body p-4">
+                <form action="{{ url_for('auth.login') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="username_or_email" class="form-label fw-semibold">Username or Email</label>
+                        <input type="text" class="form-control" id="username_or_email" name="username_or_email" placeholder="Enter username or email" required autofocus>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-semibold">Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
+                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">Sign In</button>
+                </form>
+            </div>
+            <div class="card-footer bg-light text-center py-3">
+                <span class="text-muted">Don't have an account?</span>
+                <a href="{{ url_for('auth.register') }}" class="fw-bold text-primary ms-1">Register here</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

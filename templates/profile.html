@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Profile - Workload Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-person text-primary me-2"></i>Student Profile</h3>
+        <p class="text-muted mb-0">View and update your academic engineering profile information.</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-primary text-white py-3 fw-bold">
+                <i class="bi bi-person-lines-fill me-2"></i>Academic Details
+            </div>
+            <div class="card-body p-4">
+                <form action="{{ url_for('profile_module.profile_view') }}" method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Username</label>
+                            <input type="text" class="form-control bg-light" value="{{ current_user.username }}" readonly disabled>
+                            <small class="text-muted">Username cannot be changed</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email Address</label>
+                            <input type="email" class="form-control bg-light" value="{{ current_user.email }}" readonly disabled>
+                            <small class="text-muted">Registered email address</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="student_id_no" class="form-label fw-semibold">Student Roll No / ID</label>
+                            <input type="text" class="form-control" id="student_id_no" name="student_id_no" value="{{ current_user.student_id_no or '' }}" placeholder="e.g. 21BCE1042">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="college" class="form-label fw-semibold">College / Institute</label>
+                            <input type="text" class="form-control" id="college" name="college" value="{{ current_user.college or '' }}" placeholder="e.g. National Institute of Technology">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="department" class="form-label fw-semibold">Department / Branch</label>
+                            <input type="text" class="form-control" id="department" name="department" value="{{ current_user.department or '' }}" placeholder="e.g. Computer Science & Engineering">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="year" class="form-label fw-semibold">Academic Year</label>
+                            <input type="text" class="form-control" id="year" name="year" value="{{ current_user.year or '' }}" placeholder="e.g. 3rd Year">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="semester" class="form-label fw-semibold">Semester</label>
+                            <input type="text" class="form-control" id="semester" name="semester" value="{{ current_user.semester or '' }}" placeholder="e.g. Semester 6">
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-bold shadow-sm">
+                            <i class="bi bi-save me-2"></i>Save Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

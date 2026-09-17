@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}Workload Analytics - Academic Workload Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-graph-up text-primary me-2"></i>Workload Analytics & Visualizations</h3>
+        <p class="text-muted mb-0">Visual analysis of academic distribution, task statuses, subject stress loads, and course attendance.</p>
+    </div>
+    <span class="badge bg-{{ workload.badge_class }} fs-6 px-3 py-2">
+        Workload Score: {{ workload.score }} / 100 ({{ workload.category }})
+    </span>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Workload Score Summary Card -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-header bg-white py-3 fw-bold"><i class="bi bi-speedometer2 me-2 text-primary"></i>Workload Index</div>
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <h1 class="display-3 fw-bold text-{{ workload.badge_class.split()[0] }}">{{ workload.score }}</h1>
+                <h5 class="fw-bold text-muted text-uppercase mb-3">{{ workload.category }} WORKLOAD</h5>
+                <div class="progress mb-2" style="height: 12px;">
+                    <div class="progress-bar bg-{{ workload.badge_class.split()[0] }}" role="progressbar" style="width: {{ workload.score }}%;"></div>
+                </div>
+                <small class="text-muted">Calculated dynamically from tasks, assignments, and exam deadlines.</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Status Distribution Chart -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-header bg-white py-3 fw-bold"><i class="bi bi-pie-chart me-2 text-info"></i>Tasks by Status</div>
+            <div class="card-body">
+                <canvas id="taskStatusChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignment Status Distribution Chart -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-header bg-white py-3 fw-bold"><i class="bi bi-donut-chart me-2 text-warning"></i>Assignments by Status</div>
+            <div class="card-body">
+                <canvas id="assignStatusChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Subject Workload Bar Chart -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-header bg-white py-3 fw-bold"><i class="bi bi-bar-chart-line me-2 text-success"></i>Subject Workload Scores</div>
+            <div class="card-body">
+                <canvas id="subjectWorkloadChart" height="220"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estimated Study Hours Bar Chart -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-header bg-white py-3 fw-bold"><i class="bi bi-clock-history me-2 text-danger"></i>Estimated Study Hours by Subject</div>
+            <div class="card-body">
+                <canvas id="subjectHoursChart" height="220"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Attendance Percentage by Subject -->
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-white py-3 fw-bold"><i class="bi bi-person-check me-2 text-primary"></i>Course Attendance by Subject (%)</div>
+            <div class="card-body">
+                <canvas id="attendanceChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Task Status Chart
+    const taskCtx = document.getElementById('taskStatusChart').getContext('2d');
+    new Chart(taskCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Not Started', 'In Progress', 'Completed', 'Overdue'],
+            datasets: [{
+                data: {{ task_stats | tojson }},
+                backgroundColor: ['#6c757d', '#0d6efd', '#198754', '#dc3545']
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+
+    // 2. Assignment Status Chart
+    const assignCtx = document.getElementById('assignStatusChart').getContext('2d');
+    new Chart(assignCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Not Started', 'In Progress', 'Submitted', 'Late'],
+            datasets: [{
+                data: {{ assign_stats | tojson }},
+                backgroundColor: ['#6c757d', '#ffc107', '#198754', '#dc3545']
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+
+    // Subject data variables
+    const subjectNames = {{ subject_data | map(attribute='name') | list | tojson }};
+    const subjectScores = {{ subject_data | map(attribute='workload_score') | list | tojson }};
+    const subjectHours = {{ subject_data | map(attribute='estimated_hours') | list | tojson }};
+
+    // 3. Subject Workload Bar Chart
+    const subWorkloadCtx = document.getElementById('subjectWorkloadChart').getContext('2d');
+    new Chart(subWorkloadCtx, {
+        type: 'bar',
+        data: {
+            labels: subjectNames.length ? subjectNames : ['No Subjects'],
+            datasets: [{
+                label: 'Workload Score',
+                data: subjectScores.length ? subjectScores : [0],
+                backgroundColor: '#0d6efd',
+                borderRadius: 5
+            }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+    });
+
+    // 4. Subject Hours Bar Chart
+    const subHoursCtx = document.getElementById('subjectHoursChart').getContext('2d');
+    new Chart(subHoursCtx, {
+        type: 'bar',
+        data: {
+            labels: subjectNames.length ? subjectNames : ['No Subjects'],
+            datasets: [{
+                label: 'Estimated Hours Needed',
+                data: subjectHours.length ? subjectHours : [0],
+                backgroundColor: '#fd7e14',
+                borderRadius: 5
+            }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    // 5. Attendance Bar Chart
+    const attLabels = {{ att_labels | tojson }};
+    const attPcts = {{ att_pcts | tojson }};
+    const attCtx = document.getElementById('attendanceChart').getContext('2d');
+    new Chart(attCtx, {
+        type: 'bar',
+        data: {
+            labels: attLabels.length ? attLabels : ['No Attendance Data'],
+            datasets: [{
+                label: 'Attendance Percentage (%)',
+                data: attPcts.length ? attPcts : [0],
+                backgroundColor: '#198754',
+                borderRadius: 5
+            }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+    });
+});
+</script>
+{% endblock %}

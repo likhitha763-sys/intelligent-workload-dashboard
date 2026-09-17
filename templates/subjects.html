@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Subjects - Academic Workload Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-journal-bookmark text-primary me-2"></i>Subject Management</h3>
+        <p class="text-muted mb-0">Manage your engineering courses, subject codes, credit allocations, and workload activity.</p>
+    </div>
+    <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
+        <i class="bi bi-plus-lg me-1"></i> Add Subject
+    </button>
+</div>
+
+<!-- Subjects Summary Cards -->
+{% if subjects %}
+<div class="row g-3 mb-4">
+    {% for subject in subjects %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm rounded-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <span class="badge bg-primary-subtle text-primary fw-bold me-1">{{ subject.code or 'SUB' }}</span>
+                        <span class="badge bg-secondary-subtle text-secondary">{{ subject.semester or 'General' }}</span>
+                    </div>
+                    <span class="badge bg-info text-dark"><i class="bi bi-award me-1"></i>{{ subject.credits }} Credits</span>
+                </div>
+                <h5 class="fw-bold text-dark mb-1">{{ subject.name }}</h5>
+                <p class="text-muted small mb-3"><i class="bi bi-person me-1"></i>Faculty: {{ subject.faculty_name or 'N/A' }}</p>
+                
+                <div class="bg-light p-2 rounded-2 mb-3 small">
+                    <div class="row text-center g-1">
+                        <div class="col-4">
+                            <span class="d-block fw-bold text-primary">{{ subject.tasks.count() }}</span>
+                            <span class="text-muted">Tasks</span>
+                        </div>
+                        <div class="col-4 border-start border-end">
+                            <span class="d-block fw-bold text-warning">{{ subject.assignments.count() }}</span>
+                            <span class="text-muted">Assignments</span>
+                        </div>
+                        <div class="col-4">
+                            <span class="d-block fw-bold text-danger">{{ subject.exams.count() }}</span>
+                            <span class="text-muted">Exams</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <button class="btn btn-sm btn-outline-primary" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#editSubjectModal{{ subject.id }}">
+                        <i class="bi bi-pencil me-1"></i> Edit
+                    </button>
+                    <form action="{{ url_for('subjects.delete_subject', subject_id=subject.id) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to delete {{ subject.name }}? This will remove associated workload tasks.">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash me-1"></i> Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Subject Modal for {{ subject.name }} -->
+    <div class="modal fade" id="editSubjectModal{{ subject.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ url_for('subjects.edit_subject', subject_id=subject.id) }}" method="POST">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Edit Subject</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3 text-start">
+                            <label class="form-label fw-semibold">Subject Name</label>
+                            <input type="text" class="form-control" name="name" value="{{ subject.name }}" required>
+                        </div>
+                        <div class="row text-start mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Subject Code</label>
+                                <input type="text" class="form-control" name="code" value="{{ subject.code or '' }}" placeholder="e.g. CS501">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Semester</label>
+                                <input type="text" class="form-control" name="semester" value="{{ subject.semester or '' }}" placeholder="e.g. Semester 5">
+                            </div>
+                        </div>
+                        <div class="mb-3 text-start">
+                            <label class="form-label fw-semibold">Faculty Name</label>
+                            <input type="text" class="form-control" name="faculty_name" value="{{ subject.faculty_name or '' }}">
+                        </div>
+                        <div class="mb-3 text-start">
+                            <label class="form-label fw-semibold">Credits</label>
+                            <input type="number" class="form-control" name="credits" value="{{ subject.credits }}" min="1" max="10" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary fw-bold">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body text-center py-5 text-muted">
+        <i class="bi bi-journal-x fs-1 d-block mb-3 text-secondary"></i>
+        <h5>No subjects enrolled yet</h5>
+        <p class="mb-3">Start by adding your engineering course subjects.</p>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
+            <i class="bi bi-plus-lg me-1"></i> Add Subject Now
+        </button>
+    </div>
+</div>
+{% endif %}
+
+<!-- Add Subject Modal -->
+<div class="modal fade" id="addSubjectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('subjects.add_subject') }}" method="POST">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Add New Subject</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-semibold">Subject Name</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="e.g. Computer Networks" required>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="code" class="form-label fw-semibold">Subject Code</label>
+                            <input type="text" class="form-control" id="code" name="code" placeholder="e.g. CS501">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="semester" class="form-label fw-semibold">Semester</label>
+                            <input type="text" class="form-control" id="semester" name="semester" placeholder="e.g. Semester 5">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="faculty_name" class="form-label fw-semibold">Faculty Name</label>
+                        <input type="text" class="form-control" id="faculty_name" name="faculty_name" placeholder="e.g. Dr. Andrew Tanenbaum">
+                    </div>
+                    <div class="mb-3">
+                        <label for="credits" class="form-label fw-semibold">Credits</label>
+                        <input type="number" class="form-control" id="credits" name="credits" value="3" min="1" max="10" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary fw-bold">Add Subject</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

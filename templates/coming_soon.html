@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }} - Coming Soon{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-5">
+    <div class="col-md-8 text-center">
+        <div class="card border-0 shadow-sm p-5 rounded-3">
+            <div class="card-body">
+                <div class="bg-primary-subtle text-primary d-inline-block p-4 rounded-circle mb-4">
+                    <i class="bi bi-rocket-takeoff fs-1"></i>
+                </div>
+                <h2 class="fw-bold text-dark mb-2">{{ page_title }}</h2>
+                <span class="badge bg-warning text-dark fs-6 px-3 py-2 mb-3">Coming Soon (Stage 3+)</span>
+                <p class="lead text-muted">{{ description }}</p>
+                <hr class="my-4">
+                <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-primary px-4 py-2 fw-bold">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

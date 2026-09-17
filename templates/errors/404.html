@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ error_title or 'Page Not Found' }} - Workload Dashboard{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-5">
+    <div class="col-md-6 text-center">
+        <div class="card border-0 shadow-sm p-5 rounded-3">
+            <div class="card-body">
+                <div class="bg-primary-subtle text-primary d-inline-block p-4 rounded-circle mb-4">
+                    <i class="bi bi-exclamation-triangle fs-1"></i>
+                </div>
+                <h2 class="fw-bold text-dark mb-2">{{ error_title or '404 - Page Not Found' }}</h2>
+                <p class="lead text-muted">{{ error_msg or 'The requested academic workload resource could not be found.' }}</p>
+                <hr class="my-4">
+                <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-primary px-4 py-2 fw-bold shadow-sm">
+                    <i class="bi bi-house-door me-1"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+/* Custom Styling for Intelligent Student Academic Workload Dashboard */
+
+body {
+    background-color: #f4f6f9;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #2c3e50;
+}
+
+/* Sidebar Styling */
+#sidebar-wrapper {
+    min-width: 260px;
+    max-width: 260px;
+    transition: margin 0.25s ease-out;
+}
+
+/* Responsive Toggled Sidebar */
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: -260px;
+}
+
+@media (max-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: -260px;
+    }
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: 0;
+    }
+}
+
+.sidebar-heading {
+    font-size: 1.15rem;
+    letter-spacing: 0.5px;
+}
+
+#sidebar-wrapper .list-group-item {
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+#sidebar-wrapper .list-group-item:hover {
+    background-color: #2b3035 !important;
+    color: #ffffff !important;
+}
+
+/* Cards & Metric Gauge */
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.08) !important;
+}
+
+.workload-gauge-circle {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 8px solid;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+/* Badges & Accents */
+.badge {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* Utility */
+.max-width-500 {
+    max-width: 500px;
+}
+
+.bg-primary-subtle {
+    background-color: #e7f1ff !important;
+}
+
+.bg-warning-subtle {
+    background-color: #fff3cd !important;
+}
+
+.bg-danger-subtle {
+    background-color: #f8d7da !important;
+}
+
+.bg-success-subtle {
+    background-color: #d1e7dd !important;
+}

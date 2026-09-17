@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Insights - Academic Workload Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-cpu-fill text-primary me-2"></i>AI Insights & Recommendations</h3>
+        <p class="text-muted mb-0">Automated intelligent analytics derived from real SQLite database metrics.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for item in insights %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3 h-100 border-start border-4 border-{{ item.badge_class.split()[0] }}">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-{{ item.badge_class }} px-3 py-2 fs-6">
+                        {{ item.category }}
+                    </span>
+                    <div class="text-{{ item.badge_class.split()[0] }} fs-3">
+                        <i class="bi {{ item.icon }}"></i>
+                    </div>
+                </div>
+                <p class="card-text text-dark fw-medium fs-6 mb-0">{{ item.text }}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

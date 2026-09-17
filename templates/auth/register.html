@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Registration - Workload Dashboard{% endblock %}
+
+{% block auth_content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow border-0 rounded-3">
+            <div class="card-header bg-primary text-white text-center py-3">
+                <h4 class="mb-0 fw-bold"><i class="bi bi-person-plus-fill me-2"></i>Student Registration</h4>
+                <small>Create your academic workload profile</small>
+            </div>
+            <div class="card-body p-4">
+                <form action="{{ url_for('auth.register') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label fw-semibold">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Choose a username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-semibold">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="name@student.edu" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-semibold">Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Create password" required>
+                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 py-2 fw-bold shadow-sm">Register Account</button>
+                </form>
+            </div>
+            <div class="card-footer bg-light text-center py-3">
+                <span class="text-muted">Already registered?</span>
+                <a href="{{ url_for('auth.login') }}" class="fw-bold text-primary ms-1">Login here</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
